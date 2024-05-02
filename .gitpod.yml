@@ -1,0 +1,5 @@
+tasks:
+  - name: Setup alias and open README
+    init: |
+      code README.md ; \
+      clear

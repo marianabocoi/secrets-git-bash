@@ -1,35 +1,34 @@
-# sample_secrets
+# Bashing Git
 
-## Introduction
+If you are curious how to rummage through the git innards then this short one is for you! 
 
-GitGuardian offers the possibility to **scan your repositories' entire git history for [secrets](https://www.gitguardian.com/secrets-detection)**, across all git branches.
+The current repository is based off [GitGuardian sample secrets](https://github.com/GitGuardian/sample_secrets) but with some commits on top to add the guide. ([Original README](ORIGINAL_README.md))
 
-This repository contains sample secrets for testing purposes. Our recommended procedure is to:
-1. **Fork this repository** to your GitHub user account or to a GitHub organization where you are admin.
-2. [**Sign up to GitGuardian**](https://dashboard.gitguardian.com/auth/signup) for free if you haven't already.
-3. **Integrate** your GitHub user (or GitHub organization) within GitGuardian.
-4. Once the repos are being monitored by GitGuardian, you **can scan their git history** via the [Perimeter page](https://dashboard.gitguardian.com/perimeter)
-5. **The [secrets incidents](https://www.gitguardian.com/secrets-detection) uncovered by GitGuardian** will be visible in the [Incidents page](https://dashboard.gitguardian.com/incidents/secrets).
+## Open this exercise GitPods
+You can continue reading the guide in GitPods from here.
 
-## What types of secrets will you find in this repository
+[![Start with Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/marianabocoi/secrets-git-bash)
 
-Before going further, be aware that **a single secret can be seen in multiple places within a repository**. We refer to them as **occurrences** of the secret. GitGuardian groups these occurrences under the same secret incident.
+ℹ️ If it asks you to create an account, log in with GitHub.
 
-=> **A secret incident can have multiple occurrences**. This allows you to understand how you might be affected by [secret sprawl](https://blog.gitguardian.com/secret-sprawl/).
+## Digg for secrets
+You can use this [shell one-liner](https://twitter.com/TomNomNom/status/1133345832688857095) that [@TomNomNom](https://twitter.com/TomNomNom) came up with, which dumps the contents of a repository's object database, and then greps on the result.
 
-| Secret detector        | Secret           | # of occurrences  |
-| ------------- |:-------------| -----:|
-| AWS keys    | `hjshXXXXXXXXXXXXXXXXXXsjkja`| 1 |
-| MongoDB URI      | `hub2XXXoeu`      | 3 |
-| PostgreSQL Credentials | `sup3XXXXXXXXXorGG`      |  2 |
-| Generic High Entropy Secret | `ezkjXXXXXXXXXXXXXXXXXzhnze`      |  1 |
-| Generic High Entropy Secret | `mrglXXXXXXXXXXXXXXXXXX2Z3Y`      |  1 |
-| RSA Private Key | `MIIEXXXXXXX......XXXXXXXXg4wA=`      |  1 |
-| SMTP credentials | `OhYeXXXXXXXXXXXtPas`      |  1 |
-| LDAP credentials | `k%udXXXXXXXXX8=H_`      |  1 |
+```
+{ find .git/objects/pack/ -name "*.idx"|while read i;do git show-index < "$i"|awk '{print $2}';done;find .git/objects/ -type f|grep -v '/pack/'|awk -F'/' '{print $(NF-1)$NF}'; }|while read o;do git cat-file -p $o;done|grep -E 'pattern'
+```
 
-Of course, these are not the only types of secrets that we support. You can find an exhaustive list of our detectors in our [secrets detection engine documentation](https://docs.gitguardian.com/secrets-detection/home).
+For example, a pattern you could use is: `mongodb(\+srv)?\:(\/\/)?(\w+)?:(\w+)@`
 
+## Remove secrets & try again
+Let's see what we find if we do:
+```
+rm bucket_s3.py postgres_model.js 
+git add .
+git commit -m "removed secrets"
+```
 
-> :owl: [GitGuardian](https://www.gitguardian.com/) is an automated secrets detection service.
-We help developers and security teams secure the modern software development process.
+Re-run the command above.
+
+## Bonus!
+Can you make them go away completley?
